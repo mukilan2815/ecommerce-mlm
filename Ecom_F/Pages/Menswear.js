@@ -71,6 +71,7 @@ const Menswear = ({ navigation }) => {
               display: "flex",
               marginTop: -20,
               marginBottom: 10,
+              fontWeight: "900",
             }}
           >
             StreetMall

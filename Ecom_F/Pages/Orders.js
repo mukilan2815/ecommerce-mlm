@@ -3,19 +3,11 @@ import {
   StyleSheet,
   View,
   ScrollView,
-  TextInput,
   Image,
   TouchableOpacity,
   Text,
 } from "react-native";
-import Icon from "react-native-vector-icons/FontAwesome";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import {
-  faUsersViewfinder,
-  faMapMarkerAlt,
-  faCheckCircle,
-  faMagnifyingGlass,
-} from "@fortawesome/free-solid-svg-icons";
+
 import BottomBar from "./BottomBar";
 import axios from "axios";
 import { useUserContext } from "./UserContext";

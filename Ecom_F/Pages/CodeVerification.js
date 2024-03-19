@@ -164,13 +164,13 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 30,
   },
   successMessageContainer: {
-    backgroundColor: "green", // Adjust the background color
+    backgroundColor: "green", 
     padding: 10,
     marginVertical: 10,
     borderRadius: 5,
   },
   successMessageText: {
-    color: "black", // Adjust the text color
+    color: "black", 
     textAlign: "center",
   },
   errorText: {
@@ -225,8 +225,8 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   tinyLogo: {
-    width: "100%", // occupy the entire width of the screen
-    height: "50%", // adjust the height as needed
+    width: "100%",
+    height: "50%",
     top: 0,
     position: "absolute",
   },

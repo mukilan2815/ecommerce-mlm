@@ -46,41 +46,37 @@ const SignInScreen = ({ navigation }) => {
 
   useEffect(() => {
     const checkAutoLogin = async () => {
-      try { 
-        const storedUsername = await AsyncStorage.getItem("username");
-        const storedPassword = await AsyncStorage.getItem("password");
+      try {
+        const [storedUsername, storedPassword] = await Promise.all([
+          AsyncStorage.getItem("username"),
+          AsyncStorage.getItem("password"),
+        ]);
 
         if (storedUsername && storedPassword) {
-          setUserName(storedUsername);
-          updateUserID(storedUsername);
-          setPassword(storedPassword);
-          try {
-            const response = await axios.post(
-              `${BASE_URL}/api/login/`,
-              {
-                username: storedUsername,
-                password: storedPassword, 
+          const response = await axios.post(
+            `${BASE_URL}/api/login/`,
+            {
+              username: storedUsername,
+              password: storedPassword,
+            },
+            {
+              headers: {
+                "Content-Type": "application/json",
               },
-              {
-                headers: {
-                  "Content-Type": "application/json",
-                }, 
-              }
-            );
-            console.log("Login Response:", response.data);
-
-            if (response.data === 1) {
-              setUserName(storedUsername);
-              updateUserID(storedUsername);
-              setPassword(storedPassword);
-              navHome();
             }
-          } catch (error) {
-            console.error("Login failed:", error.message);
+          );
+
+          console.log("Login Response:", response.data);
+
+          if (response.data === 1) {
+            setUserName(storedUsername);
+            updateUserID(storedUsername);
+            navHome();
+            setPassword(storedPassword);
           }
         }
       } catch (error) {
-        console.error(error);
+        console.error("Auto login failed:", error.message);
       }
     };
 
@@ -103,28 +99,23 @@ const SignInScreen = ({ navigation }) => {
     navigation.navigate("Home", { username });
     updateUserID(username);
   };
-  
-  const navreset = async () => {
 
+  const navreset = async () => {
     if (username) {
-      // Username is empty, show a message
       try {
         const response = await axios.post(`${BASE_URL}/api/forgetpass/`, {
           username: username,
-        })
-        if (response.data == 'Sent') {
-          updateUserID(username)
+        });
+        if (response.data == "Sent") {
+          updateUserID(username);
           navigation.navigate("CodeVerification");
-        }
-        else {
+        } else {
           setErrorMessage(response.data);
         }
-      }
-      catch (error) {
-        console.error(error)
+      } catch (error) {
+        console.error(error);
       }
     } else {
-      // Username is not empty, navigate to the Resetpass screen
       setErrorMessage("Enter username for OTP verification");
     }
   };
@@ -143,11 +134,11 @@ const SignInScreen = ({ navigation }) => {
       const response = await axios.post(
         `${BASE_URL}/api/login/`,
         {
-          username: username,  
-          password: password, 
+          username: username,
+          password: password,
         },
-        {    
-          headers: { 
+        {
+          headers: {
             "Content-Type": "application/json",
           },
         }
@@ -157,20 +148,23 @@ const SignInScreen = ({ navigation }) => {
       console.log("Login Response:", response.data);
 
       if (response.data === 1) {
-        updateUserID(username)
-        if (rememberPassword) { saveCredentialsToCache(username, password); }else{updateUserID(username)}
-        saveCredentialsToCache(username, password)
-        setErrorMessage(null)
+        updateUserID(username);
+        if (rememberPassword) {
+          saveCredentialsToCache(username, password);
+        } else {
+          updateUserID(username);
+        }
+        saveCredentialsToCache(username, password);
+        setErrorMessage(null);
         navHome();
-
-      } else { 
+      } else {
         setErrorMessage(response.data["message"]);
       }
     } catch (error) {
       console.error("Login failed:", error.message);
     }
   };
- 
+
   return (
     <View style={styles.container}>
       <Text style={styles.welcome}>Welcome</Text>
@@ -180,20 +174,20 @@ const SignInScreen = ({ navigation }) => {
       <View style={styles.allsignIn}>
         <View style={styles.rowContainer}>
           <Text style={styles.text}>Login</Text>
-        </View> 
+        </View>
         {errorMessage && <Text style={styles.errorText}>{errorMessage}</Text>}
         <View style={styles.inputContainer}>
-          <TextInput 
+          <TextInput
             style={styles.input}
             placeholder="Username"
             onChangeText={(text) => setUserName(text)}
           />
           <FontAwesomeIcon
-            icon={faUser} 
-            size={20} 
+            icon={faUser}
+            size={20}
             color="black"
             style={styles.icon}
-          /> 
+          />
         </View>
         <View style={styles.inputContainer}>
           <TextInput
@@ -233,10 +227,10 @@ const SignInScreen = ({ navigation }) => {
               />
               <Text style={{ marginLeft: 5, color: "#6B5E5E" }}>
                 Remember Password
-              </Text> 
+              </Text>
             </View>
           </TouchableOpacity>
-          <TouchableOpacity onPress={()=>navigation.navigate('forgetuser')}>
+          <TouchableOpacity onPress={() => navigation.navigate("forgetuser")}>
             <Text style={{ color: "#1977F3" }}>Forget Password</Text>
           </TouchableOpacity>
         </View>
@@ -277,9 +271,9 @@ const styles = StyleSheet.create({
     height: 200,
     position: "absolute",
     top: 0,
-    zIndex: 10, 
+    zIndex: 10,
   },
-  
+
   forgetPassword: {
     color: "#1977F3",
     fontSize: 16,
@@ -314,7 +308,7 @@ const styles = StyleSheet.create({
   checkbox: {
     borderRadius: 5,
     padding: 8,
-    marginRight: 10, 
+    marginRight: 10,
   },
   rememberText: {
     color: "#1977F3",

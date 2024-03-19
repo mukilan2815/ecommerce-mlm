@@ -5,17 +5,11 @@ import {
   Text,
   StatusBar,
   ScrollView,
-  TextInput,
   Image,
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import {
-  faMagnifyingGlass,
-  faUsersViewfinder,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import Trackbar from "../Streetmall/14_Checkout_page/step.png";
 import BottomBar from "./BottomBar";
 import { useEffect } from "react";
@@ -23,12 +17,42 @@ import axios from "axios";
 import { useRoute } from "@react-navigation/native";
 import { useUserContext } from "./UserContext";
 
-const PaymentPage = ({ navigation }) => {
-  const route = useRoute();
-  const { product_ids,cdata } = route.params;
+const PaymentPage = ({ navigation, route }) => {
+  const { product_ids, cdata } = route.params;
   const { userID, BASE_URL } = useUserContext();
+  useEffect(() => {
+    console.log("products", product_ids);
+    console.log("cdata", cdata);
+    const apiUrl = `${BASE_URL}/api/order/address/${userID}/`;
+    axios
+      .get(apiUrl)
+      .then((response) => {
+        setUserData(response.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching user data:", error);
+      });
+  }, []);
+  const buyAllProducts = async () => {
+    try {
+      for (let productId of product_ids) {
+        await buyProduct(userID, productId);
+
+      }
+    } catch (error) {
+      console.error("Error buying products:", error);
+    }
+  };
+
+  const buyProduct = async (userID, product_id) => {
+    try {
+      console.log(`Product ${product_id} bought successfully`);
+    } catch (error) {
+      console.error(`Error buying product ${product_id}:`, error);
+    }
+  };
   const goToPaymentPage2 = () => {
-    navigation.navigate("Payment2", { userData, product_ids,cdata });
+    navigation.navigate("Payment2", { userData, product_ids, cdata });
   };
 
   const handleEditPress = () => {
@@ -38,14 +62,14 @@ const PaymentPage = ({ navigation }) => {
   const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // Replace 'your-api-endpoint' with the actual endpoint of your API
     const apiUrl = `${BASE_URL}/api/order/address/${userID}/`;
 
     axios
       .get(apiUrl)
       .then((response) => {
-        // Assuming the response structure is { username: "user's name", address: { /* address details */ } }
         setUserData(response.data);
+        console.log("Data fetched successfully:", response.data);
+        console.log("Products", product_ids);
       })
       .catch((error) => {
         console.error("Error fetching data:", error);
@@ -76,6 +100,7 @@ const PaymentPage = ({ navigation }) => {
                 alignItems: "center",
                 display: "flex",
                 marginTop: -10,
+                fontWeight: "900",
               }}
             >
               StreetMall

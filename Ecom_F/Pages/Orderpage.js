@@ -9,11 +9,6 @@ import {
   Text,
 } from "react-native";
 import rect from "../Streetmall/Orderstatement/rect.png";
-import FontAwesomeIcon from "react-native-vector-icons/FontAwesome";
-import {
-  faMagnifyingGlass,
-  faUsersViewfinder,
-} from "@fortawesome/free-solid-svg-icons";
 import Trackbar from "../Streetmall/Orderstatement/trackbar.png";
 import BottomBar from "./BottomBar";
 
@@ -80,6 +75,8 @@ const OrderTrackingPage = ({ navigation }) => {
               textAlign: "center",
               alignItems: "center",
               display: "flex",
+              fontWeight: "900",
+
               marginTop: -10,
             }}
           >

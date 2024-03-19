@@ -1,60 +1,65 @@
 import React, { useState } from "react";
-import { StatusBar } from "react-native";
 import {
-  StyleSheet,
-  Text,
-  View,
-  Image,
-  TextInput,
+  StatusBar,
+  ImageBackground,
   TouchableOpacity,
+  View,
+  ScrollView,
+  Text,
+  TextInput,
+  Image,
+  StyleSheet,
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
-import { library } from "@fortawesome/fontawesome-svg-core";
 import {
-  faCircleRight,
-  faUser,
-  faLock,
   faEye,
   faEyeSlash,
+  faMagnifyingGlass,
 } from "@fortawesome/free-solid-svg-icons";
-import axios from "axios"; // Import axios
 import signInImage from "../Streetmall/3_Login/ASSETS.png";
+import axios from "axios"; // Import axios
 import { useUserContext } from "./UserContext";
 
-library.add(faCircleRight, faUser, faLock, faEye, faEyeSlash);
-
 const ResetPasswordScreen = ({ navigation }) => {
-  const { userID,BASE_URL } = useUserContext();
+  const { userID, BASE_URL } = useUserContext();
   const [username, setUsername] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
+  const [passwordMismatchError, setPasswordMismatchError] = useState(false); // Define state for password mismatch error
+  const [emojiError, setEmojiError] = useState(false); // Define state for emoji error
 
   const handleResetPassword = async () => {
     try {
+      // Reset error messages
+      setPasswordMismatchError(false);
+      setEmojiError(false);
+
+      // Check for password mismatch
       if (newPassword !== confirmPassword) {
-        setErrorMessage("Passwords do not match");
-        setTimeout(() => {
-          setErrorMessage("");
-        }, 3000);
+        setPasswordMismatchError(true);
         return;
       }
 
-      const response = await axios.post(
-        `${BASE_URL}/api/resetpass/`,
-        {
-          username: username,
-          old_password: currentPassword,
-          new_password: newPassword,
-        }
-      );
+      // Check for emoji in password
+      const regex =
+        /[\uD800-\uDBFF][\uDC00-\uDFFF]|\p{Emoji_Presentation}|\p{Extended_Pictographic}/gu;
+      if (regex.test(newPassword)) {
+        setEmojiError(true);
+        return;
+      }
+
+      const response = await axios.post(`${BASE_URL}/api/resetpass/`, {
+        username: username,
+        old_password: currentPassword,
+        new_password: newPassword,
+      });
 
       if (response.data === 1) {
         navigation.navigate("Login");
       } else {
-        
         setErrorMessage(response.data["message"]);
       }
     } catch (error) {
@@ -68,105 +73,102 @@ const ResetPasswordScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Image style={styles.background} source={signInImage} />
-      <View style={styles.overlay} />
-      <Text style={styles.heading}>Reset Password</Text>
-      <View style={styles.allsignIn}>
-        {errorMessage !== "" && (
-          <Text style={styles.errorText}>{errorMessage}</Text>
-        )}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Username"
-            onChangeText={(text) => setUsername(text)}
-            value={username}
-          />
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Current Password"
-            secureTextEntry={!showPassword}
-            value={currentPassword}
-            onChangeText={(text) => setCurrentPassword(text)}
-          />
-
-          <TouchableOpacity
-            onPress={togglePasswordVisibility}
-            style={styles.icon}
-          >
-            <FontAwesomeIcon
-              icon={showPassword ? faEyeSlash : faEye}
-              size={20}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="New Password"
-            secureTextEntry={!showPassword}
-            onChangeText={(text) => setNewPassword(text)}
-            value={newPassword}
-          />
-          <TouchableOpacity
-            onPress={togglePasswordVisibility}
-            style={styles.icon}
-          >
-            <FontAwesomeIcon
-              icon={showPassword ? faEyeSlash : faEye}
-              size={20}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            placeholder="Confirm Password"
-            secureTextEntry={!showPassword}
-            onChangeText={(text) => setConfirmPassword(text)}
-            value={confirmPassword}
-          />
-          <TouchableOpacity
-            onPress={togglePasswordVisibility}
-            style={styles.icon}
-          >
-            <FontAwesomeIcon
-              icon={showPassword ? faEyeSlash : faEye}
-              size={20}
-              color="white"
-            />
-          </TouchableOpacity>
-        </View>
+    <View style={{ flex: 1, backgroundColor: "#fff" }}>
+      <ScrollView style={{ flex: 1 }}>
         <View
           style={{
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
+            backgroundColor: "#1977F3",
+            padding: 20,
+            paddingVertical: 70,
+            marginBottom: 20,
           }}
         >
-          <TouchableOpacity
-            onPress={handleResetPassword}
-            style={styles.confirmButton}
-          >
-            <Text style={styles.confirmButtonText}>Confirm</Text>
-          </TouchableOpacity>
           <Text
-            style={{ fontSize: 13, paddingVertical: 5, marginVertical: 20 }}
-            onPress={() => {
-              navigation.navigate("CodeVerification");
+            style={{
+              fontSize: 30,
+              color: "#fff",
+              fontWeight: "bold",
+              textAlign: "center",
+              alignItems: "baseline",
+              justifyContent: "flex-end",
+              marginBottom: -10,
+              fontWeight: "900",
+
+              display: "flex",
             }}
           >
-            Forget Password?
-          </Text> 
+            STREETMALL
+          </Text>
         </View>
-      </View>
-      <StatusBar style="auto" />
+        <ImageBackground style={styles.background} blurRadius={3}>
+          <StatusBar barStyle="light-content" />
+          <View style={styles.container}>
+            <Text style={styles.heading}>Reset Password</Text>
+            {passwordMismatchError && (
+              <Text style={styles.errorText}>Passwords do not match</Text>
+            )}
+            {emojiError && (
+              <Text style={styles.errorText}>
+                Emoji are not allowed in the password
+              </Text>
+            )}
+            {errorMessage !== "" && (
+              <Text style={styles.errorText}>{errorMessage}</Text>
+            )}
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              onChangeText={(text) => setUsername(text)}
+              value={username}
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Current Password"
+              secureTextEntry={!showPassword}
+              value={currentPassword}
+              onChangeText={(text) => setCurrentPassword(text)}
+            />
+            <View style={styles.passwordInputContainer}>
+              <TextInput
+                style={styles.passwordInput}
+                placeholder="New Password"
+                secureTextEntry={!showPassword}
+                onChangeText={(text) => setNewPassword(text)}
+                value={newPassword}
+              />
+              <TouchableOpacity
+                onPress={togglePasswordVisibility}
+                style={styles.eyeIcon}
+              >
+                <FontAwesomeIcon
+                  icon={showPassword ? faEyeSlash : faEye}
+                  size={20}
+                  color="white"
+                />
+              </TouchableOpacity>
+            </View>
+            <TextInput
+              style={styles.input}
+              placeholder="Confirm Password"
+              secureTextEntry={!showPassword}
+              onChangeText={(text) => setConfirmPassword(text)}
+              value={confirmPassword}
+            />
+            <TouchableOpacity
+              onPress={handleResetPassword}
+              style={styles.confirmButton}
+            >
+              <Text style={styles.confirmButtonText}>Confirm</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.forgotPasswordLink}
+              onPress={() => navigation.navigate("CodeVerification")}
+            >
+              <Text style={styles.forgotPasswordText}>Forget Password?</Text>
+            </TouchableOpacity>
+          </View>
+        </ImageBackground>
+      </ScrollView>
     </View>
   );
 };
@@ -174,65 +176,87 @@ const ResetPasswordScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#1977F3",
     justifyContent: "center",
-    padding: 20,
+    paddingHorizontal: 30,
   },
   background: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
     resizeMode: "cover",
-    opacity: 0.7,
-  },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(25, 119, 243, 0.7)",
+    justifyContent: "center",
   },
   heading: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "white",
+    color: "black",
     textAlign: "center",
     marginBottom: 20,
   },
-  allsignIn: {
-    backgroundColor: "transparent",
-    borderRadius: 20,
-    padding: 20,
+  input: {
+    height: 40,
+    color: "black",
+    borderBottomWidth: 1,
+    borderColor: "black",
+    marginBottom: 20,
   },
-  inputContainer: {
+  passwordInputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderBottomWidth: 1,
-    borderColor: "white",
-    marginVertical: 10,
+    marginBottom: 20,
   },
-  input: {
+  passwordInput: {
     flex: 1,
+    borderBottomWidth: 1,
+    borderColor: "black",
     height: 40,
-    color: "white",
+    color: "black",
   },
-  icon: {
-    marginLeft: 10,
+  eyeIcon: {
+    marginLeft: -30,
   },
   confirmButton: {
     backgroundColor: "#fff",
-    padding: 15,
+    paddingVertical: 15,
     borderRadius: 10,
-    width: "60%",
-    alignSelf: "center",
+    alignItems: "center",
     marginTop: 20,
   },
   confirmButtonText: {
-    color: "#1977F3",
+    color: "#000",
+    backgroundColor: "#e8e4e9",
     fontSize: 16,
+    paddingHorizontal: 60,
+    paddingVertical: 10,
+    borderRadius: 10,
     fontWeight: "bold",
-    textAlign: "center",
+  },
+  forgotPasswordLink: {
+    alignItems: "center",
+    marginTop: 20,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    color: "white",
+    textDecorationLine: "underline",
   },
   errorText: {
     color: "red",
     fontSize: 16,
     textAlign: "center",
-    marginTop: 10,
+    marginBottom: 10,
+  },
+  topbarinput: {
+    justifyContent: "center",
+    marginHorizontal: 20,
+    borderRadius: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "white",
+    padding: 10,
+  },
+  inputBox: {
+    flex: 1,
+    color: "#1977F3",
+    marginLeft: 10,
   },
 });
 

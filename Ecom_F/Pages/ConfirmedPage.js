@@ -21,7 +21,7 @@ import { useUserContext } from "./UserContext";
 import { useEffect } from "react";
 import axios from "axios";
 
-const PaymentPage4 = ({ navigation }) => {
+const Confirmedpage = ({ navigation }) => {
   const [refreshKey, setRefreshKey] = useState(0);
   const [cartData, setCartData] = useState("");
   const [cartItem, setCartItem] = useState("");
@@ -62,7 +62,7 @@ const PaymentPage4 = ({ navigation }) => {
         productData.push(temp);
       }
 
-      console.log("Success");
+      console.log("confirmed page came");
       return productData;
     } catch (error) {
       console.log("Failed to load data");
@@ -355,4 +355,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default PaymentPage4;
+export default Confirmedpage;

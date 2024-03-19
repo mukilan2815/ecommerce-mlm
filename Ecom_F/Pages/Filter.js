@@ -1,32 +1,44 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, FlatList, SafeAreaView, StyleSheet } from 'react-native';
-import { Button, List, Divider } from 'react-native-paper';
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  FlatList,
+  SafeAreaView,
+  StyleSheet,
+} from "react-native";
+import { Button, List, Divider } from "react-native-paper";
 
 const FilterPage = () => {
-  const categories = ['Category', 'Brand', 'Price', 'Reviews', 'Delivery'];
-
-  const [selectedCategory, setSelectedCategory] = useState('');
+  const categories = ["Category", "Brand", "Price", "Reviews", "Delivery"];
+  const [selectedCategory, setSelectedCategory] = useState("");
   const [filterOptions, setFilterOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const sampleData = {
-    Category: ['Electronics', 'Clothing', 'Shoes', 'Accessories'],
-    Brand: ['Nike', 'Adidas', 'Samsung', 'Apple'],
-    Price: ['Under $25', '$25 - $50', '$50 - $100', '$100 and above'],
-    Reviews: ['⭐', '⭐⭐', '⭐⭐⭐', '⭐⭐⭐⭐', '⭐⭐⭐⭐⭐'],
-    Delivery: ['Next Day Delivery', 'Express Shipping', 'Standard Shipping'],
+  const fetchFilterOptions = async (category) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        `http://64.227.134.220:8000/api/filter/${category.toLowerCase()}/`
+      );
+      if (!response.ok) {
+        throw new Error("Failed to fetch data");
+      }
+      const data = await response.json();
+      setFilterOptions(data[category]);
+      setError(null);
+    } catch (error) {
+      console.error("Error fetching filter options:", error);
+      setError("Failed to fetch filter options");
+    } finally {
+      setLoading(false);
+    }
   };
-
-  const renderFilterOptions = ({ item }) => (
-    <TouchableOpacity style={styles.filterOption}>
-      <Button mode="contained" style={styles.Button}>
-        <Text style={styles.Buttontxt}>{item}</Text>
-      </Button>
-    </TouchableOpacity>
-  );
 
   const handleCategoryPress = (category) => {
     setSelectedCategory(category);
-    setFilterOptions(sampleData[category]);
+    fetchFilterOptions(category);
   };
 
   return (
@@ -51,19 +63,31 @@ const FilterPage = () => {
           </List.Section>
         </View>
         <View style={styles.rightSection}>
-          {selectedCategory ? (
+          {error ? (
+            <Text style={styles.errorText}>{error}</Text>
+          ) : selectedCategory ? (
             <>
-              <Text style={styles.optionsHeader}>{selectedCategory} Options:</Text>
+              <Text style={styles.optionsHeader}>
+                {selectedCategory} Options:
+              </Text>
               <Divider />
               <FlatList
                 data={filterOptions}
-                renderItem={renderFilterOptions}
+                renderItem={({ item }) => (
+                  <TouchableOpacity style={styles.filterOption}>
+                    <Button mode="contained" style={styles.Button}>
+                      <Text style={styles.Buttontxt}>{item}</Text>
+                    </Button>
+                  </TouchableOpacity>
+                )}
                 keyExtractor={(item, index) => index.toString()}
                 style={styles.filterOptionsList}
               />
             </>
           ) : (
-            <Text style={styles.selectCategoryText}>Please select a category to see options.</Text>
+            <Text style={styles.selectCategoryText}>
+              Please select a category to see options.
+            </Text>
           )}
         </View>
       </View>
@@ -78,12 +102,12 @@ const styles = StyleSheet.create({
   },
   mainContainer: {
     flex: 1,
-    flexDirection: 'row',
+    flexDirection: "row",
   },
   leftSection: {
     width: 150,
-    backgroundColor: '#C3C3C3',
-    height: '100%',
+    backgroundColor: "#C3C3C3",
+    height: "100%",
     paddingBottom: 20,
   },
   categoryItem: {
@@ -92,9 +116,9 @@ const styles = StyleSheet.create({
   rightSection: {
     flex: 2,
     borderLeftWidth: 1,
-    borderColor: '#ccc',
+    borderColor: "#ccc",
     padding: 10,
-    backgroundColor: '#F5F5F5',
+    backgroundColor: "#F5F5F5",
   },
   optionsHeader: {
     fontSize: 18,
@@ -107,15 +131,15 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   selectCategoryText: {
-    textAlign: 'center',
+    textAlign: "center",
     marginTop: 20,
   },
   Button: {
-    backgroundColor: '#C3C3C3',
+    backgroundColor: "#C3C3C3",
   },
   Buttontxt: {
-    color: 'black',
-    fontWeight: '600',
+    color: "black",
+    fontWeight: "600",
   },
 });
 

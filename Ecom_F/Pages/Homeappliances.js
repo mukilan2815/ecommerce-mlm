@@ -70,6 +70,8 @@ const Homeappliances = ({ navigation }) => {
               alignItems: "center",
               display: "flex",
               marginTop: -20,
+              fontWeight: "900",
+
               marginBottom: 10,
             }}
           >

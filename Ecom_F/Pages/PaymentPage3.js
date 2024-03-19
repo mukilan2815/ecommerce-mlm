@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -22,7 +22,7 @@ import { useRoute } from "@react-navigation/native";
 
 const PaymentPage3 = ({ navigation }) => {
   const route = useRoute();
-  const { userData, selectedDeliveryOption, product_ids,cdata } = route.params;
+  const { userData, selectedDeliveryOption, product_ids, cdata } = route.params;
 
   const goToPaymentPage4 = () => {
     navigation.navigate("Payment4", {
@@ -33,7 +33,10 @@ const PaymentPage3 = ({ navigation }) => {
       product_ids,
     });
   };
-
+  useEffect(() => {
+    console.log("product_ids", product_ids);
+    console.log("cdata", cdata);
+  });
   const [selectedPaymentOption, setSelectedPaymentOption] = useState(null);
   const handlePaymentOptionPress = (option) => {
     setSelectedPaymentOption(option);
@@ -83,6 +86,7 @@ const PaymentPage3 = ({ navigation }) => {
                 alignItems: "center",
                 display: "flex",
                 marginTop: -10,
+                fontWeight: "900",
               }}
             >
               StreetMall

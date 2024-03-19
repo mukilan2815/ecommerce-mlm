@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   StyleSheet,
   View,
@@ -22,8 +22,11 @@ import { useRoute } from "@react-navigation/native";
 
 const PaymentPage2 = ({ navigation }) => {
   const route = useRoute();
-  const { userData, product_ids,cdata } = route.params;
-
+  const { userData, product_ids, cdata } = route.params;
+  useEffect(() => {
+    console.log("product_ids", product_ids);
+    console.log("cdata", cdata);
+  });
   const goToPaymentPage3 = () => {
     navigation.navigate("Payment3", {
       selectedDeliveryOption,
@@ -75,6 +78,8 @@ const PaymentPage2 = ({ navigation }) => {
                 color: "#fff",
                 textAlign: "center",
                 alignItems: "center",
+                fontWeight: "900",
+
                 display: "flex",
                 marginTop: -10,
               }}

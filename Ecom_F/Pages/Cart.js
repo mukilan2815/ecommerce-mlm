@@ -36,6 +36,15 @@ const Cart = ({ navigation }) => {
   const [productIds, setPI] = useState([]);
   const [allProducts, setAllProducts] = useState([]);
   const { userID, BASE_URL, updateUserID } = useUserContext();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, []);
 
   const fetchCartData = useCallback(async () => {
     try {
@@ -81,11 +90,16 @@ const Cart = ({ navigation }) => {
           const temp = response.data;
           temp["inCart"] =
             cartItem.find((i) => i["product_id"] === productId)?.quantity || 0;
-          productData.push(temp);
+
+          if (temp.inCart > 0) {
+            productData.push(temp);
+          } else {
+            await handleDelete(userID, productId);
+          }
         }
 
         console.log("Success");
-        console.log(productIds);
+        console.log(cartData);
         return productData;
       } catch (error) {
         console.log("Failed to load data");
@@ -93,7 +107,7 @@ const Cart = ({ navigation }) => {
         return null;
       }
     },
-    [BASE_URL, cartItem]
+    [BASE_URL, cartItem, handleDelete, userID]
   );
 
   useEffect(() => {
@@ -121,6 +135,13 @@ const Cart = ({ navigation }) => {
   const handleDelete = useCallback(
     async (userID, product_id) => {
       try {
+        setCartItem((prevCartItems) =>
+          prevCartItems.map((item) =>
+            item.product_id === product_id
+              ? { ...item, quantity: Math.max(item.quantity - 1, 0) }
+              : item
+          )
+        );
         const response = await axios.post(
           `${BASE_URL}/api/updateCart/-/`,
           {
@@ -133,23 +154,46 @@ const Cart = ({ navigation }) => {
             },
           }
         );
-        console.log("Deleted");
+
         if (response.data === "Deleted") {
-          setAllProducts((prevProducts) =>
-            prevProducts.filter((product) => product.product_id !== product_id)
-          );
-          setRefreshKey((prevKey) => prevKey + 1);
           console.log("Cart total is zero after deletion");
-        } else {
-          console.log("Deleted");
         }
-        setRefreshKey((prevKey) => prevKey + 1);
+
+        console.log("Deleted");
       } catch (error) {
         console.log("Unable To Update", error);
       }
     },
-    [BASE_URL]
+    [BASE_URL, setCartItem]
   );
+
+  const handleAdd = async (userID, product_id) => {
+    try {
+      setCartItem((prevCartItems) =>
+        prevCartItems.map((item) =>
+          item.product_id === product_id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+        )
+      );
+      const response = await axios.post(
+        `${BASE_URL}/api/updateCart/+/`,
+        {
+          username: userID,
+          product_id: product_id,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      console.log("Added");
+    } catch (error) {
+      console.log("Unable To Update", error);
+    }
+  };
 
   const navigateToSingleProduct = useCallback(
     (product, index) => {
@@ -158,30 +202,13 @@ const Cart = ({ navigation }) => {
     [navigation]
   );
 
-  const handleAdd = useCallback(
-    async (userID, product_id) => {
-      try {
-        const response = await axios.post(
-          `${BASE_URL}/api/updateCart/+`,
-          {
-            username: userID,
-            product_id: product_id,
-          },
-          {
-            headers: {
-              "Content-Type": "application/json",
-            },
-          }
-        );
-        console.log("Added");
-        setRefreshKey((prevKey) => prevKey + 1);
-      } catch (error) {
-        console.log("Unable To Update", error);
-      }
-    },
-    [BASE_URL]
-  );
-
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Loading...</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.containerw}>
       <KeyboardAvoidingView
@@ -363,6 +390,17 @@ const styles = StyleSheet.create({
     color: "white",
     marginTop: 8,
     textAlign: "center",
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5", // Background color for the loading screen
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#333", // Text color
   },
   buynowall: {
     width: 200,

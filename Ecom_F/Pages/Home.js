@@ -111,7 +111,7 @@ const Home = ({ navigation }) => {
               style={{
                 fontSize: 30,
                 color: "#fff",
-                fontWeight: "bold",
+                fontWeight: "900",
                 textAlign: "center",
                 alignItems: "center",
                 display: "flex",

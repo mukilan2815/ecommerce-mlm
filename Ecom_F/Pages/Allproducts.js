@@ -26,7 +26,6 @@ import { library } from "@fortawesome/fontawesome-svg-core";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import BottomBar from "../Pages/BottomBar";
 import ProductItem from "../Pages/ProductItem";
-import FilterPage from "../Pages/Filter";
 import axios from "axios";
 import { useRoute } from "@react-navigation/native";
 import { useUserContext } from "./UserContext";
@@ -73,25 +72,18 @@ const AllProductPage = ({ navigation }) => {
     brand7,
     brand8,
   ];
-
   const [isFilterModalVisible, setFilterModalVisible] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(null);
-
-  const handleFilterIconClick = () => {
-    setFilterModalVisible(true);
-  };
-
-  const handleCloseFilterModal = () => {
-    setFilterModalVisible(false);
-  };
-
   const [searchQuery, setSearchQuery] = useState("");
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
 
   const fetchProducts = async () => {
     try {
       const response = await axios.get(`${BASE_URL}/api/product/`);
       setProducts(response.data);
+      console.log("allproducts from product/");
     } catch (error) {
       console.log("Failed to load data");
       console.error("Error fetching products:", error);
@@ -106,19 +98,44 @@ const AllProductPage = ({ navigation }) => {
     try {
       const response = await axios.get(`${BASE_URL}/api/search/?query=${text}`);
       setProducts(response.data);
+      setSearchQuery(text);
+      console.log("allproducts from search/", text);
     } catch (error) {
       console.error("Error searching:", error);
     }
   };
 
+  const handleRatingFilter = async (ordering) => {
+    try {
+      let apiUrl = `${BASE_URL}/api/filter/products/?ordering=${ordering}`;
+      if (searchQuery) {
+        apiUrl += `&search=${searchQuery}`;
+      }
+      const response = await axios.get(apiUrl);
+      setProducts(response.data);
+      console.log("ordering and search ", searchQuery, ordering);
+    } catch (error) {
+      console.error("Error filtering by rating:", error);
+    }
+  };
+
+  const handleFilterIconClick = () => {
+    setFilterModalVisible(true);
+  };
+
+  const handleCloseFilterModal = () => {
+    setFilterModalVisible(false);
+  };
+
   useEffect(() => {
     if (item) {
       handleSearch(item.text);
+      setSearchQuery(item.text);
     } else {
       fetchProducts();
     }
   }, [item]);
-  console.log("all products");
+
   return (
     <View style={styles.containerw}>
       <KeyboardAvoidingView
@@ -152,7 +169,8 @@ const AllProductPage = ({ navigation }) => {
                   style={styles.inputBox}
                   value={searchQuery}
                   onChangeText={(text) => {
-                    handleSearch(text), setSearchQuery(text);
+                    handleSearch(text);
+                    setSearchQuery(text);
                   }}
                 />
               </View>
@@ -227,8 +245,52 @@ const AllProductPage = ({ navigation }) => {
           visible={isFilterModalVisible}
           onRequestClose={handleCloseFilterModal}
         >
-          <FilterPage closeModal={handleCloseFilterModal} />
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>Filter Options</Text>
+              <TouchableOpacity onPress={() => handleRatingFilter("discount")}>
+                <Text style={styles.filterOption}>
+                  Sort by Discount (Low to High)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleRatingFilter("-discount")}>
+                <Text style={styles.filterOption}>
+                  Sort by Discount (High to Low)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleRatingFilter("sellingPrice")}
+              >
+                <Text style={styles.filterOption}>
+                  Sort by Price (Low to High)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={() => handleRatingFilter("-sellingPrice")}
+              >
+                <Text style={styles.filterOption}>
+                  Sort by Price (High to Low)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleRatingFilter("-rating")}>
+                <Text style={styles.filterOption}>
+                  Sort by Rating (High to Low)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => handleRatingFilter("rating")}>
+                <Text style={styles.filterOption}>
+                  Sort by Rating (Low to High)
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={handleCloseFilterModal}>
+                <Text style={[styles.filterOption, styles.closeButton]}>
+                  Close
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </Modal>
+
         <View style={styles.blueBar}></View>
       </KeyboardAvoidingView>
 
@@ -239,13 +301,17 @@ const AllProductPage = ({ navigation }) => {
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Category")}>
-          <View style={[styles.navbarIcon, styles.navbarIconHome1]}>
-            <FontAwesomeIcon icon={faBars} size={20} color={"#1977F3"} />
+          <View style={[styles.navbarIcon, styles.navbarIconHome]}>
+            <FontAwesomeIcon icon={faBars} size={20} color={"white"} />
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Cart")}>
-          <View style={[styles.navbarIcon, styles.navbarIconHome]}>
-            <FontAwesomeIcon icon={faShoppingCart} size={20} color={"white"} />
+          <View style={[styles.navbarIcon, styles.navbarIconHome1]}>
+            <FontAwesomeIcon
+              icon={faShoppingCart}
+              size={20}
+              color={"#1977F3"}
+            />
           </View>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("User")}>
@@ -266,6 +332,13 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     width: "50%",
   },
+  filterOption: {
+    fontSize: 16,
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#CCCCCC",
+  },
+
   filtericon: {
     position: "absolute",
     bottom: "40%",
@@ -278,6 +351,37 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     shadowColor: "#003478",
     elevation: 4,
+  },
+  modalContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContent: {
+    backgroundColor: "white",
+    padding: 20,
+    borderRadius: 10,
+    width: "80%",
+  },
+  modalTitle: {
+    fontSize: 20,
+    fontWeight: "bold",
+    marginBottom: 10,
+    textAlign: "center",
+  },
+  closeButton: {
+    backgroundColor: "#1977F3",
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 20,
+    alignSelf: "center",
+  },
+  closeButtonText: {
+    color: "white",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
   },
   navbar: {
     width: "100%",

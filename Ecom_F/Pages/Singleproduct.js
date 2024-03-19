@@ -181,6 +181,8 @@ const SingleProductPage = ({ navigation, route }) => {
                 color: "#fff",
                 textAlign: "center",
                 alignItems: "center",
+                fontWeight: "900",
+
                 display: "flex",
                 marginTop: -20,
                 marginBottom: 10,

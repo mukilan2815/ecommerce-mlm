@@ -87,6 +87,7 @@ const Category = ({ navigation }) => {
                 textAlign: "center",
                 alignItems: "center",
                 display: "flex",
+                fontWeight:"900",
                 marginTop: -10,
                 marginBottom: 10,
               }}
@@ -101,10 +102,12 @@ const Category = ({ navigation }) => {
                 color="black"
               />
               <TextInput
-                placeholder="Search streetmall.com"
+                placeholder="Search Streetmall.com"
                 style={styles.inputBox}
+                onPressIn={() =>
+                  navigation.navigate("AProduct", { item: { text: "" } })
+                }
               />
-              {/* <FontAwesomeIcon icon={faUsersViewfinder} size={20} color="black" /> */}
             </View>
             <StatusBar barStyle="dark-content" />
           </View>

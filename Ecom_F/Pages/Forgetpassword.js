@@ -10,7 +10,12 @@ import {
 } from "react-native";
 import { FontAwesomeIcon } from "@fortawesome/react-native-fontawesome";
 import { library } from "@fortawesome/fontawesome-svg-core";
-import { faCircleRight, faLock, faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircleRight,
+  faLock,
+  faEye,
+  faEyeSlash,
+} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import signInImage from "../Streetmall/3_Login/ASSETS.png";
 import { useUserContext } from "./UserContext";
@@ -18,7 +23,7 @@ import { useUserContext } from "./UserContext";
 library.add(faCircleRight, faLock, faEye, faEyeSlash);
 
 const Forgetpassword = ({ navigation }) => {
-  const { userID,BASE_URL } = useUserContext();
+  const { userID, BASE_URL } = useUserContext();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -35,13 +40,10 @@ const Forgetpassword = ({ navigation }) => {
         return;
       }
 
-      const response = await axios.post(
-        `${BASE_URL}/api/resetPass/`,
-        {
-          username: userID,
-          new_password: newPassword,
-        }
-      );
+      const response = await axios.post(`${BASE_URL}/api/resetPass/`, {
+        username: userID,
+        new_password: newPassword,
+      });
 
       if (response.data === 1) {
         navigation.navigate("Login");

@@ -69,6 +69,8 @@ const Kidswear = ({ navigation }) => {
               textAlign: "center",
               alignItems: "center",
               display: "flex",
+              fontWeight: "900",
+
               marginTop: -20,
               marginBottom: 10,
             }}

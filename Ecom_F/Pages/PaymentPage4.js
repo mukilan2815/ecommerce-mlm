@@ -27,10 +27,10 @@ const PaymentPage4 = ({ navigation }) => {
   const { userID, BASE_URL } = useUserContext();
   const route = useRoute();
   const {
+    userData,
+    product_ids,
     selectedDeliveryOption,
     selectedPaymentOption,
-    product_ids,
-    userData,
     cdata,
   } = route.params;
 
@@ -46,6 +46,8 @@ const PaymentPage4 = ({ navigation }) => {
           const discount =
             (productDetails.mrp - productDetails.sellingPrice) * item.quantity;
           total_discount += discount;
+          console.log(productDetails.name);
+
           return {
             name: item.name,
             product_id: item.product_id,
@@ -70,24 +72,25 @@ const PaymentPage4 = ({ navigation }) => {
     fetchData();
   }, [product_ids, cdata]);
 
-  const [dc,setdc]=useState(0);
+  const [dc, setdc] = useState(0);
 
   var deliveryCost = proDetails.total > 200 ? 0 : 40;
-  useEffect(()=>{
-    if (selectedDeliveryOption==="Instant Delivery"){
-      deliveryCost+=100;
+  useEffect(() => {
+    if (selectedDeliveryOption === "Instant Delivery") {
+      deliveryCost += 100;
     }
-    console.log(deliveryCost)
-    setdc(deliveryCost)
-  },[]) 
-
+    console.log(deliveryCost);
+    setdc(deliveryCost);
+  }, []);
 
   const fetchProducts = async (product_ids) => {
     try {
       const productData = [];
       var temp = "";
       for (let productId of product_ids) {
-        const response = await axios.get(`${BASE_URL}/api/product/${productId}/`);
+        const response = await axios.get(
+          `${BASE_URL}/api/product/${productId}/`
+        );
 
         temp = response.data;
         productData.push(temp);
@@ -102,34 +105,38 @@ const PaymentPage4 = ({ navigation }) => {
   };
 
   const postData = async () => {
-    if (selectedPaymentOption == "Paytm" || "Net Banking") {
+    if (
+      selectedPaymentOption === "Paytm" ||
+      selectedPaymentOption === "Net Banking"
+    ) {
       var pay_method = "UPI";
     } else {
       var pay_method =
-        selectedPaymentOption == "Credit/Debit Card" ? "Card" : "COD";
+        selectedPaymentOption === "Credit/Debit Card" ? "Card" : "COD";
     }
-    const data = {
-      user: userID,
-      product_ids: product_ids,
-      delivery_type: selectedDeliveryOption,
-      pay_method: pay_method,
-    };
-    console.log(data)
+
     try {
+      console.log(pay_method);
+      const productIds = cdata.cart_items.map((item) => item.product_id);
+      const data = {
+        user: userID,
+        product_ids: productIds, // Ensure product_ids is an array
+        delivery_type: selectedDeliveryOption,
+        pay_method: pay_method,
+      };
+      console.log(data); // Log productIds just before sending the request
       const response = await axios.post(
         `${BASE_URL}/api/order/placeOrders/`,
-        data, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      }
+        data
       );
 
-      if (response.data == 1) {
-        goToConfirmedPage();
-      }else {
-        goToConfirmedPage();
+      if (response.data === 1) {
+        console.log("Orders placed successfully");
+      } else {
+        console.log("Failed to place orders");
       }
+
+      goToConfirmedPage();
     } catch (error) {
       console.error("Error:", error);
     }
@@ -138,7 +145,6 @@ const PaymentPage4 = ({ navigation }) => {
   const goToConfirmedPage = () => {
     navigation.navigate("confirmed");
   };
-
 
   return (
     <View style={styles.containerw}>
@@ -158,6 +164,8 @@ const PaymentPage4 = ({ navigation }) => {
                 textAlign: "center",
                 alignItems: "center",
                 display: "flex",
+                fontWeight: "900",
+
                 marginTop: -10,
               }}
             >
@@ -185,7 +193,7 @@ const PaymentPage4 = ({ navigation }) => {
                 ))}
                 <Text style={{ fontSize: 18 }}>Delivery Charge:</Text>
                 <Text style={{ fontSize: 18 }}>Discount:</Text>
-               
+
                 <Text style={{ fontSize: 18 }}>Total:</Text>
               </View>
 
@@ -196,13 +204,9 @@ const PaymentPage4 = ({ navigation }) => {
                   </Text>
                 ))}
                 <Text style={{ fontSize: 18 }}>₹ {dc}</Text>
-                <Text style={{ fontSize: 18 }}>
-                ₹ -{proDetails.discount}
-                </Text>
-               
-                <Text style={{ fontSize: 18 }}>
-                ₹ {proDetails.total}
-                </Text>
+                <Text style={{ fontSize: 18 }}>₹ -{proDetails.discount}</Text>
+
+                <Text style={{ fontSize: 18 }}>₹ {proDetails.total}</Text>
               </View>
             </View>
             <Text> {"\n"} </Text>
@@ -214,7 +218,7 @@ const PaymentPage4 = ({ navigation }) => {
               </View>
               <View style={styles.orderDetailsRight}>
                 <Text style={{ fontSize: 18, fontWeight: "bold" }}>
-                ₹ {proDetails.total}
+                  ₹ {proDetails.total}
                 </Text>
               </View>
             </View>

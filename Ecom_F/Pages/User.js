@@ -123,7 +123,7 @@ const User = ({ navigation }) => {
 
   const updateUserData = async () => {
     if (!userData.phone.startsWith("+91")) {
-      setError("Check your mobile number with country code.");
+      setError("Check your mobile number, Enter with country code.");
       addLog(errorMessage);
       console.log(errorMessage);
       return;
